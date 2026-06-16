@@ -1,0 +1,58 @@
+@startuml
+
+title Kubernetes Layout
+
+skinparam shadowing false
+
+node "Kubernetes Cluster" {
+
+    frame "Namespace: security-platform" {
+
+        node "API Gateway Deployment" {
+            component "gateway-pod-1"
+            component "gateway-pod-2"
+        }
+
+        node "Transaction Decision Deployment" {
+            component "decision-pod-1"
+            component "decision-pod-2"
+            component "decision-pod-3"
+        }
+
+        node "Risk Assessment Deployment" {
+            component "risk-pod-1"
+            component "risk-pod-2"
+            component "risk-pod-3"
+        }
+
+        node "Authentication Deployment" {
+            component "auth-pod-1"
+            component "auth-pod-2"
+        }
+
+        node "Account Protection Deployment" {
+            component "protection-pod-1"
+            component "protection-pod-2"
+        }
+
+        node "Audit Deployment" {
+            component "audit-pod-1"
+        }
+
+    }
+
+    node "Kafka StatefulSet" {
+        component "broker-1"
+        component "broker-2"
+        component "broker-3"
+    }
+
+    node "Redis StatefulSet" {
+        component "redis-master"
+        component "redis-replica"
+    }
+
+    node "OpenTelemetry Collector"
+}
+
+@enduml

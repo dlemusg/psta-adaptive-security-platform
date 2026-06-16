@@ -1,0 +1,150 @@
+@startuml
+title Escenario 4 - Indisponibilidad del Proveedor OTP
+
+autonumber
+
+actor Cliente
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Risk Assessment Service" as RAS
+participant "Adaptive Authentication Service" as AAS
+participant "OTP Adapter" as OTP
+participant "Push Adapter" as PUSH
+participant "Circuit Breaker Manager" as CB
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio de la Transacción ==
+
+Cliente -> Channel : Solicita transferencia
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+TDS -> Kafka : TransactionReceived
+
+== Evaluación de Riesgo ==
+
+Kafka -> RAS : TransactionReceived
+
+activate RAS
+
+RAS -> RAS : Risk Assessment
+
+note right
+RiskScore = 0.72
+RiskLevel = HIGH
+end note
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+== Solicitud de Autenticación ==
+
+Kafka -> TDS : RiskScoreCalculated
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+High Risk
+Requiere autenticación
+end note
+
+TDS -> Kafka : TransactionRequiresAuthentication
+
+deactivate TDS
+
+== Inicio de Autenticación Adaptativa ==
+
+Kafka -> AAS : TransactionRequiresAuthentication
+
+activate AAS
+
+AAS -> AAS : Authentication Orchestrator
+AAS -> AAS : Factor Selection Policy
+
+note right
+Factor seleccionado:
+OTP
+end note
+
+== Falla del Proveedor OTP ==
+
+AAS -> OTP : Generar OTP
+
+OTP --> AAS : Timeout / Error
+
+AAS -> CB : Reportar fallo
+
+CB -> CB : Incrementar contador
+
+note right
+Proveedor degradado
+end note
+
+== Activación del Fallback ==
+
+AAS -> AAS : Fallback Engine
+
+note right
+OTP indisponible
+Cambio automático
+a Push Authentication
+end note
+
+AAS -> PUSH : Solicitar aprobación Push
+
+PUSH --> Cliente : Notificación Push
+
+Cliente --> PUSH : Aprueba autenticación
+
+PUSH --> AAS : Validación exitosa
+
+== Autenticación Exitosa ==
+
+AAS -> Kafka : AuthenticationCompleted
+
+deactivate AAS
+
+== Decisión Final ==
+
+Kafka -> TDS : AuthenticationCompleted
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Identidad validada
+Operación aprobada
+end note
+
+TDS -> Kafka : TransactionApproved
+
+deactivate TDS
+
+== Ejecución de la Operación ==
+
+Kafka -> Audit : AuthenticationCompleted
+
+Kafka -> Audit : TransactionApproved
+
+TDS -> Core : Ejecutar transferencia
+
+Core --> TDS : Transferencia exitosa
+
+== Respuesta al Cliente ==
+
+TDS --> Gateway : Aprobada
+
+Gateway --> Channel : HTTP 200
+
+Channel --> Cliente : Transferencia exitosa
+@enduml

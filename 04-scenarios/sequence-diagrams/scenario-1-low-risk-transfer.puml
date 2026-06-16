@@ -1,0 +1,92 @@
+@startuml
+
+title Escenario 1 - Transferencia de Bajo Riesgo
+
+autonumber
+
+actor Cliente
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Risk Assessment Service" as RAS
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio de la Transacción ==
+
+Cliente -> Channel : Solicita transferencia
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+== Registro del Evento ==
+
+TDS -> Kafka : TransactionReceived
+
+note right
+Monto habitual
+Beneficiario conocido
+Dispositivo confiable
+Ubicación esperada
+end note
+
+== Evaluación de Riesgo ==
+
+Kafka -> RAS : TransactionReceived
+
+activate RAS
+
+RAS -> RAS : Transaction Context Builder
+RAS -> RAS : Velocity Engine
+RAS -> RAS : Device Risk Engine
+RAS -> RAS : Behavior Profiling Engine
+RAS -> RAS : Geo Risk Engine
+RAS -> RAS : Fraud Rule Engine
+RAS -> RAS : Risk Score Calculator
+
+note right
+RiskScore = 0.15
+RiskLevel = LOW
+end note
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+== Decisión Transaccional ==
+
+Kafka -> TDS : RiskScoreCalculated
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+No requiere
+autenticación adicional
+end note
+
+TDS -> Kafka : TransactionApproved
+
+deactivate TDS
+
+== Ejecución de la Operación ==
+
+Kafka -> Audit : TransactionApproved
+
+TDS -> Core : Ejecutar transferencia
+
+Core --> TDS : Transferencia exitosa
+
+== Respuesta al Cliente ==
+
+TDS --> Gateway : Aprobada
+
+Gateway --> Channel : HTTP 200
+
+Channel --> Cliente : Transferencia exitosa
+
+@enduml

@@ -1,0 +1,173 @@
+@startuml
+
+title Escenario 8 - Intento de Account Takeover (ATO)
+
+autonumber
+
+actor Attacker as "Actor Malicioso"
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Adaptive Authentication Service" as AAS
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Risk Assessment Service" as RAS
+participant "Device Trust Service" as DTS
+participant "Customer Profile Service" as CPS
+participant "Account Protection Service" as APS
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio del Ataque ==
+
+Attacker -> Channel : Inicia sesión
+
+Channel -> Gateway : Login
+
+Gateway -> AAS : Solicitud de autenticación
+
+activate AAS
+
+AAS -> DTS : Evaluar dispositivo
+
+DTS --> AAS : Device Trust = LOW
+
+note right
+Dispositivo desconocido
+Nueva IP
+Nuevo navegador
+end note
+
+AAS -> Kafka : AuthenticationCompleted
+
+deactivate AAS
+
+== Señales de Riesgo Adicionales ==
+
+note over CPS,RAS
+Minutos después
+se observan acciones anómalas
+end note
+
+Attacker -> Channel : Cambiar contraseña
+
+Channel -> Gateway : Cambio de contraseña
+
+Gateway -> Kafka : PasswordChanged
+
+Attacker -> Channel : Registrar beneficiario
+
+Channel -> Gateway : Nuevo beneficiario
+
+Gateway -> Kafka : BeneficiaryAdded
+
+== Correlación de Señales ==
+
+Kafka -> RAS : AuthenticationCompleted
+Kafka -> RAS : PasswordChanged
+Kafka -> RAS : BeneficiaryAdded
+
+activate RAS
+
+RAS -> CPS : Consultar perfil histórico
+
+CPS --> RAS : Perfil cliente
+
+RAS -> RAS : Device Risk Engine
+RAS -> RAS : Behavior Profiling Engine
+RAS -> RAS : Beneficiary Risk Engine
+RAS -> RAS : Fraud Rule Engine
+
+note right
+Señales detectadas:
+
+- Dispositivo nuevo
+- Nueva IP
+- Cambio contraseña
+- Beneficiario nuevo
+- Tiempo reducido
+end note
+
+RAS -> RAS : Risk Correlation Engine
+
+note right
+Posible Account Takeover
+end note
+
+RAS -> RAS : Risk Score Calculator
+
+note right
+RiskScore = 0.99
+RiskLevel = CRITICAL
+end note
+
+RAS -> Kafka : FraudPatternDetected
+
+RAS -> Kafka : CriticalRiskDetected
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+== Intento de Transferencia ==
+
+Attacker -> Channel : Transferencia alto valor
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+TDS -> Kafka : TransactionReceived
+
+Kafka -> TDS : RiskScoreCalculated
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Cuenta comprometida
+Operación rechazada
+end note
+
+TDS -> Kafka : TransactionRejected
+
+deactivate TDS
+
+== Mitigación Automática ==
+
+Kafka -> APS : CriticalRiskDetected
+
+activate APS
+
+APS -> APS : Mitigation Engine
+
+note right
+Acciones:
+
+- Bloqueo de cuenta
+- Invalidar sesiones
+- Alertar cliente
+end note
+
+APS -> Kafka : AccountBlocked
+
+APS -> Kafka : SessionsInvalidated
+
+deactivate APS
+
+== Auditoría ==
+
+Kafka -> Audit : FraudPatternDetected
+
+Kafka -> Audit : CriticalRiskDetected
+
+Kafka -> Audit : TransactionRejected
+
+Kafka -> Audit : AccountBlocked
+
+== Notificación ==
+
+APS --> Attacker : Acceso bloqueado
+
+@enduml

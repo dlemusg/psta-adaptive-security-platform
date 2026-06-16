@@ -1,0 +1,41 @@
+@startuml
+
+title Multi Region Topology
+
+skinparam shadowing false
+
+cloud "Global DNS / Traffic Manager" as DNS
+
+node "Region A\nPrimary" {
+
+    node "Kubernetes Cluster A" as K8SA
+
+    node "Kafka Cluster A" as KafkaA
+
+    database "PostgreSQL A" as PgA
+
+    database "Redis A" as RedisA
+}
+
+node "Region B\nDisaster Recovery" {
+
+    node "Kubernetes Cluster B" as K8SB
+
+    node "Kafka Cluster B" as KafkaB
+
+    database "PostgreSQL B" as PgB
+
+    database "Redis B" as RedisB
+}
+
+DNS --> K8SA
+
+DNS --> K8SB
+
+PgA <--> PgB : Replicación
+
+KafkaA <--> KafkaB : MirrorMaker
+
+RedisA <--> RedisB : Replicación
+
+@enduml

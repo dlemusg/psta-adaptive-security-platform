@@ -1,0 +1,134 @@
+@startuml MultiRegionTopology
+
+title Multi-Region Disaster Recovery Topology - PSTA Platform
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+actor "Customer" as Customer
+
+cloud "Route53\nDNS Failover" as Route53
+
+frame "Primary Region\n(Active)" {
+
+    node "Amazon EKS\nPrimary Cluster" as EKS1 {
+
+        component "Risk Assessment" as Risk1
+        component "Adaptive Authentication" as Auth1
+        component "Transaction Decision" as Decision1
+        component "Account Protection" as Protection1
+        component "Audit Service" as Audit1
+    }
+
+    queue "AWS MSK\nPrimary Kafka Cluster" as Kafka1
+
+    database "RDS PostgreSQL\nPrimary" as RDS1
+
+    database "ElastiCache Redis\nPrimary" as Redis1
+
+    storage "AWS Secrets Manager\nPrimary" as Secrets1
+}
+
+frame "Secondary Region\n(Warm Standby)" {
+
+    node "Amazon EKS\nSecondary Cluster" as EKS2 {
+
+        component "Risk Assessment" as Risk2
+        component "Adaptive Authentication" as Auth2
+        component "Transaction Decision" as Decision2
+        component "Account Protection" as Protection2
+        component "Audit Service" as Audit2
+    }
+
+    queue "AWS MSK\nSecondary Kafka Cluster" as Kafka2
+
+    database "RDS PostgreSQL\nCross-Region Replica" as RDS2
+
+    database "ElastiCache Redis\nStandby" as Redis2
+
+    storage "AWS Secrets Manager\nReplica" as Secrets2
+}
+
+Customer --> Route53
+
+Route53 --> EKS1 : Normal Operation
+
+EKS1 --> Kafka1
+EKS1 --> RDS1
+EKS1 --> Redis1
+EKS1 --> Secrets1
+
+RDS1 --> RDS2 : Cross Region Replication
+
+Kafka1 --> Kafka2 : Topic Replication
+
+Secrets1 --> Secrets2 : Secret Replication
+
+Redis1 --> Redis2 : Snapshot / Backup Sync
+
+note right of Kafka1
+
+Critical Topics
+
+transaction-events
+risk-events
+authentication-events
+account-events
+audit-events
+
+end note
+
+note right of RDS2
+
+RPO < 5 min
+
+Cross Region Replica
+
+Automatic Promotion
+
+end note
+
+note right of EKS2
+
+Warm Standby
+
+Infrastructure Ready
+
+Containers Pre-Deployed
+
+end note
+
+cloud "Disaster Event" as Disaster
+
+Disaster .. EKS1
+Disaster .. Kafka1
+Disaster .. RDS1
+
+Route53 --> EKS2 : DNS Failover
+
+note bottom
+
+Disaster Recovery Flow
+
+1. Detect Failure
+
+2. Declare Disaster
+
+3. Promote RDS Replica
+
+4. Activate Secondary Kafka
+
+5. Route53 Failover
+
+6. Resume Operations
+
+Target Objectives
+
+RTO <= 15 min
+
+RPO <= 5 min
+
+end note
+
+@enduml

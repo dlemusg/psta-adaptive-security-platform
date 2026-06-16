@@ -1,0 +1,127 @@
+@startuml
+
+title Escenario 11 - Indisponibilidad del Risk Assessment Service
+
+autonumber
+
+actor Cliente
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Adaptive Authentication Service" as AAS
+participant "Risk Assessment Service" as RAS
+participant "Circuit Breaker" as CB
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio de la Operación ==
+
+Cliente -> Channel : Solicita transferencia
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+TDS -> Kafka : TransactionReceived
+
+== Evaluación de Riesgo ==
+
+TDS -> RAS : Solicitar evaluación
+
+activate RAS
+
+RAS --> TDS : Timeout
+
+deactivate RAS
+
+== Detección de Falla ==
+
+TDS -> CB : Reportar fallo
+
+CB -> CB : Abrir circuito
+
+note right
+Risk Assessment
+indisponible
+end note
+
+== Política de Contingencia ==
+
+TDS -> TDS : Contingency Decision Policy
+
+note right
+No se rechaza
+automáticamente
+
+Se asume:
+
+RiskLevel = HIGH
+end note
+
+TDS -> Kafka : RiskAssessmentUnavailable
+
+TDS -> Kafka : TransactionRequiresAuthentication
+
+== Autenticación Reforzada ==
+
+Kafka -> AAS : TransactionRequiresAuthentication
+
+activate AAS
+
+AAS -> AAS : Authentication Orchestrator
+
+note right
+Autenticación
+obligatoria
+end note
+
+AAS --> Cliente : Solicitar Push Authentication
+
+Cliente --> AAS : Aprueba autenticación
+
+AAS -> Kafka : AuthenticationCompleted
+
+deactivate AAS
+
+== Decisión Final ==
+
+Kafka -> TDS : AuthenticationCompleted
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Autenticación exitosa
+Aprobar operación
+end note
+
+TDS -> Kafka : TransactionApproved
+
+deactivate TDS
+
+== Auditoría ==
+
+Kafka -> Audit : RiskAssessmentUnavailable
+
+Kafka -> Audit : AuthenticationCompleted
+
+Kafka -> Audit : TransactionApproved
+
+== Ejecución ==
+
+TDS -> Core : Ejecutar transferencia
+
+Core --> TDS : Transferencia exitosa
+
+== Respuesta ==
+
+TDS --> Gateway : Aprobada
+
+Gateway --> Channel : HTTP 200
+
+Channel --> Cliente : Transferencia exitosa
+
+@enduml

@@ -1,0 +1,205 @@
+@startuml
+
+title Escenario 5 - Escalamiento Dinámico del Riesgo de Sesión
+
+autonumber
+
+actor Cliente
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Risk Assessment Service" as RAS
+participant "Adaptive Authentication Service" as AAS
+participant "Session Trust Manager" as STM
+participant "Device Trust Service" as DTS
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio de Sesión ==
+
+Cliente -> Channel : Inicia sesión
+
+Channel -> Gateway : Login
+
+Gateway -> AAS : Solicitud de autenticación
+
+activate AAS
+
+AAS -> STM : Crear sesión
+
+STM --> AAS : SessionTrust = HIGH
+
+note right
+Cliente autenticado
+Dispositivo conocido
+Sesión confiable
+end note
+
+deactivate AAS
+
+== Operación 1 ==
+
+Cliente -> Channel : Consulta saldo
+
+Channel -> Gateway : Solicitud
+
+Gateway -> TDS : Operación
+
+TDS -> Kafka : TransactionReceived
+
+Kafka -> RAS : TransactionReceived
+
+activate RAS
+
+RAS -> RAS : Evaluación de riesgo
+
+note right
+RiskScore = 0.10
+RiskLevel = LOW
+end note
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+Kafka -> TDS : RiskScoreCalculated
+
+TDS -> Kafka : TransactionApproved
+
+== Cambio de Contexto ==
+
+note over Cliente,DTS
+Durante la misma sesión
+se detectan señales nuevas
+end note
+
+DTS -> Kafka : DeviceTrustRevoked
+
+note right
+Nuevo IP
+Nuevo navegador
+Cambio de ubicación
+Fingerprint inconsistente
+end note
+
+== Recalculo de Riesgo de Sesión ==
+
+Kafka -> RAS : DeviceTrustRevoked
+
+activate RAS
+
+RAS -> RAS : Session Risk Evaluation
+
+note right
+SessionTrust ↓
+Riesgo creciente
+end note
+
+RAS -> Kafka : SessionRiskEscalated
+
+deactivate RAS
+
+== Operación 2 ==
+
+Cliente -> Channel : Transferencia
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+TDS -> Kafka : TransactionReceived
+
+Kafka -> RAS : TransactionReceived
+
+activate RAS
+
+RAS -> RAS : Risk Assessment
+
+note right
+RiskScore = 0.78
+RiskLevel = HIGH
+end note
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+== Autenticación Adicional ==
+
+Kafka -> TDS : RiskScoreCalculated
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Sesión degradada
+Autenticación requerida
+end note
+
+TDS -> Kafka : TransactionRequiresAuthentication
+
+deactivate TDS
+
+Kafka -> AAS : TransactionRequiresAuthentication
+
+activate AAS
+
+AAS -> STM : Consultar Session Trust
+
+STM --> AAS : LOW
+
+AAS -> AAS : Authentication Orchestrator
+
+AAS --> Cliente : Solicita Push Authentication
+
+Cliente --> AAS : Aprueba autenticación
+
+AAS -> STM : Actualizar Session Trust
+
+STM --> AAS : MEDIUM
+
+AAS -> Kafka : AuthenticationCompleted
+
+deactivate AAS
+
+== Decisión Final ==
+
+Kafka -> TDS : AuthenticationCompleted
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Identidad validada
+Operación aprobada
+end note
+
+TDS -> Kafka : TransactionApproved
+
+deactivate TDS
+
+== Ejecución ==
+
+Kafka -> Audit : SessionRiskEscalated
+
+Kafka -> Audit : AuthenticationCompleted
+
+Kafka -> Audit : TransactionApproved
+
+TDS -> Core : Ejecutar transferencia
+
+Core --> TDS : Transferencia exitosa
+
+== Respuesta ==
+
+TDS --> Gateway : Aprobada
+
+Gateway --> Channel : HTTP 200
+
+Channel --> Cliente : Transferencia exitosa
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+title C1 - System Context Diagram\nPlataforma de Seguridad Transaccional Adaptativa (PSTA)
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam rectangle {
+    RoundCorner 15
+}
+
+actor Cliente
+actor "Analista de Fraude" as FraudAnalyst
+actor "Equipo de Operaciones" as Operations
+
+rectangle "Canales Digitales\n(Web, Mobile, B2B APIs)" as Channels
+
+rectangle "PSTA\n\nPlataforma de Seguridad\nTransaccional Adaptativa\n\n• Evaluación de Riesgo\n• Detección de Fraude\n• Autenticación Adaptativa\n• Protección de Cuentas\n• Auditoría" as PSTA
+
+rectangle "Core Bancario\n(Cuentas y Transferencias)" as CoreBanking
+rectangle "Proveedor OTP\n(Clave Dinámica)" as OTP
+rectangle "Proveedor Push\n(Biometría / Push Auth)" as Push
+rectangle "Device Intelligence\n(Device Trust & Reputation)" as DeviceIntel
+rectangle "Servicio de Geolocalización" as GeoService
+rectangle "SIEM / SOC" as SIEM
+rectangle "Observabilidad\n(Prometheus / Grafana / OpenTelemetry)" as Observability
+
+Cliente --> Channels : Inicia operaciones
+Channels --> PSTA : Solicita evaluación de seguridad
+
+FraudAnalyst --> PSTA : Gestiona alertas\nInvestiga fraude
+
+Operations --> PSTA : Monitorea\nla plataforma
+
+PSTA --> CoreBanking : Autoriza / Rechaza\ntransacciones
+
+PSTA --> OTP : Solicita OTP
+
+PSTA --> Push : Solicita autenticación\nalternativa
+
+PSTA --> DeviceIntel : Consulta Device Trust
+
+PSTA --> GeoService : Consulta ubicación
+
+PSTA --> SIEM : Envía alertas\ncríticas
+
+PSTA --> Observability : Logs\nMétricas\nTrazas
+@enduml

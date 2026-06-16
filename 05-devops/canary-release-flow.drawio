@@ -1,0 +1,139 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="canary-release-flow" name="Canary Release Flow">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Canary Release Flow - PSTA" style="text;html=1;fontSize=24;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="650" y="30" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="azure-repos" value="Azure Repos&#xa;Código Fuente" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="180" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="azure-ci" value="Azure Pipeline CI&#xa;Build + Tests + Scans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="180" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ecr" value="AWS ECR&#xa;Docker Image" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="180" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="azure-cd" value="Azure Pipeline CD&#xa;Helm Deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="180" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="eks" value="AWS EKS&#xa;Kubernetes Cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="180" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="stable" value="Versión Estable&#xa;v1 - 100% tráfico inicial" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="420" width="240" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="canary5" value="Canary v2&#xa;5% tráfico&#xa;Validar métricas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="360" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="canary25" value="Canary v2&#xa;25% tráfico&#xa;Validar estabilidad" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="360" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="canary50" value="Canary v2&#xa;50% tráfico&#xa;Validar negocio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="360" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="prod100" value="Producción v2&#xa;100% tráfico" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="360" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="metrics" value="Observabilidad&#xa;Prometheus / Grafana / CloudWatch&#xa;&#xa;Error Rate&#xa;Latency&#xa;Throughput&#xa;Métricas de negocio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="610" width="320" height="160" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="decision" value="¿Métricas OK?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="640" width="160" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="rollback" value="Rollback Automático&#xa;Volver a v1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="640" width="220" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="flags" value="Feature Flags&#xa;Activación controlada&#xa;Deploy ≠ Release" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="630" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" edge="1" source="azure-repos" target="azure-ci" parent="1" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e2" edge="1" source="azure-ci" target="ecr" parent="1" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e3" edge="1" source="ecr" target="azure-cd" parent="1" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e4" edge="1" source="azure-cd" target="eks" parent="1" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e5" edge="1" source="eks" target="canary5" parent="1" value="Deploy v2" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e6" edge="1" source="stable" target="canary5" parent="1" value="95% tráfico" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e7" edge="1" source="canary5" target="canary25" parent="1" value="OK" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e8" edge="1" source="canary25" target="canary50" parent="1" value="OK" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e9" edge="1" source="canary50" target="prod100" parent="1" value="OK" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e10" edge="1" source="canary5" target="metrics" parent="1" style="dashed=1;endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e11" edge="1" source="canary25" target="metrics" parent="1" style="dashed=1;endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e12" edge="1" source="canary50" target="metrics" parent="1" style="dashed=1;endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e13" edge="1" source="metrics" target="decision" parent="1" style="endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e14" edge="1" source="decision" target="rollback" parent="1" value="No" style="endArrow=block;html=1;strokeColor=#b85450;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e15" edge="1" source="decision" target="prod100" parent="1" value="Sí" style="endArrow=block;html=1;strokeColor=#82b366;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e16" edge="1" source="flags" target="canary5" parent="1" value="Habilita funcionalidad" style="dashed=1;endArrow=block;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e17" edge="1" source="rollback" target="stable" parent="1" value="Restaurar versión estable" style="endArrow=block;html=1;strokeColor=#b85450;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

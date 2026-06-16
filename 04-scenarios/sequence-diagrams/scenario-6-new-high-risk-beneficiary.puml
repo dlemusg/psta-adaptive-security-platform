@@ -1,0 +1,163 @@
+@startuml
+
+title Escenario 6 - Transferencia a Beneficiario Nuevo de Alto Riesgo
+
+autonumber
+
+actor Cliente
+
+participant "Canal Digital" as Channel
+participant "API Gateway" as Gateway
+participant "Transaction Decision Service" as TDS
+participant "Kafka" as Kafka
+participant "Risk Assessment Service" as RAS
+participant "Adaptive Authentication Service" as AAS
+participant "Customer Profile Service" as CPS
+participant "Core Banking" as Core
+participant "Audit Service" as Audit
+
+== Inicio de la Operación ==
+
+Cliente -> Channel : Solicita transferencia
+
+Channel -> Gateway : POST /transfers
+
+Gateway -> TDS : Nueva transacción
+
+TDS -> Kafka : TransactionReceived
+
+== Construcción del Contexto ==
+
+Kafka -> RAS : TransactionReceived
+
+activate RAS
+
+RAS -> CPS : Consultar perfil cliente
+
+CPS --> RAS : Perfil histórico
+
+note right
+Beneficiario:
+NO registrado
+
+Monto:
+Superior al promedio
+
+Primera transferencia
+a este destinatario
+end note
+
+RAS -> RAS : Transaction Context Builder
+RAS -> RAS : Beneficiary Risk Engine
+RAS -> RAS : Behavior Profiling Engine
+RAS -> RAS : Fraud Rule Engine
+
+note right
+Señales detectadas:
+
+- Beneficiario nuevo
+- Monto alto
+- Operación atípica
+end note
+
+RAS -> RAS : Risk Score Calculator
+
+note right
+RiskScore = 0.74
+RiskLevel = HIGH
+end note
+
+RAS -> Kafka : RiskScoreCalculated
+
+deactivate RAS
+
+== Decisión Inicial ==
+
+Kafka -> TDS : RiskScoreCalculated
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Operación permitida
+pero requiere
+autenticación reforzada
+end note
+
+TDS -> Kafka : TransactionRequiresAuthentication
+
+deactivate TDS
+
+== Autenticación Adaptativa ==
+
+Kafka -> AAS : TransactionRequiresAuthentication
+
+activate AAS
+
+AAS -> AAS : Authentication Orchestrator
+AAS -> AAS : Factor Selection Policy
+
+note right
+Factor seleccionado:
+
+Push Authentication
+end note
+
+AAS --> Cliente : Solicita aprobación
+
+Cliente --> AAS : Aprueba autenticación
+
+AAS -> Kafka : AuthenticationCompleted
+
+deactivate AAS
+
+== Decisión Final ==
+
+Kafka -> TDS : AuthenticationCompleted
+
+activate TDS
+
+TDS -> TDS : Decision Engine
+
+note right
+Identidad validada
+Operación autorizada
+end note
+
+TDS -> Kafka : TransactionApproved
+
+deactivate TDS
+
+== Actualización de Perfil ==
+
+Kafka -> CPS : TransactionApproved
+
+activate CPS
+
+CPS -> CPS : Registrar beneficiario
+
+note right
+Beneficiario pasa
+a historial del cliente
+end note
+
+deactivate CPS
+
+== Ejecución ==
+
+Kafka -> Audit : TransactionApproved
+
+TDS -> Core : Ejecutar transferencia
+
+Core --> TDS : Transferencia exitosa
+
+== Respuesta ==
+
+TDS --> Gateway : Aprobada
+
+Gateway --> Channel : HTTP 200
+
+Channel --> Cliente : Transferencia exitosa
+
+@enduml

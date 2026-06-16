@@ -1,0 +1,82 @@
+@startuml
+title C3 - Component Diagram\nRisk Assessment Service
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam rectangle {
+    RoundCorner 15
+}
+
+rectangle "Kafka Event Backbone" as Kafka
+database "Redis Cluster\n\nVelocity counters\nSession context\nRisk hot state" as Redis
+database "PostgreSQL\n\nRisk rules\nRisk decisions\nConfiguration" as Postgres
+rectangle "Customer Profile Service" as CustomerProfile
+rectangle "Device Trust Service" as DeviceTrust
+rectangle "Geolocation Service" as GeoService
+rectangle "Observability\nOpenTelemetry / Prometheus / Grafana" as Observability
+
+rectangle "Risk Assessment Service\nJava 21 + Spring WebFlux + Reactor" {
+
+    rectangle "Kafka Event Consumer\n\nConsume eventos relevantes:\n- TransactionReceived\n- AuthenticationCompleted\n- DeviceTrustGranted\n- DeviceTrustRevoked" as KafkaConsumer
+
+    rectangle "Risk Orchestrator\n\nCoordina la evaluación de riesgo\ny consolida señales" as RiskOrchestrator
+
+    rectangle "Transaction Context Builder\n\nConstruye el contexto de evaluación\nde la operación" as ContextBuilder
+
+    rectangle "Velocity Engine\n\nEvalúa frecuencia, monto acumulado,\nbeneficiarios nuevos y ventanas de tiempo" as VelocityEngine
+
+    rectangle "Device Risk Engine\n\nEvalúa dispositivo conocido,\nreputación y cambios de confianza" as DeviceRiskEngine
+
+    rectangle "Behavioral Risk Engine\n\nCompara la operación contra el\ncomportamiento histórico del cliente" as BehavioralRiskEngine
+
+    rectangle "Geo Risk Engine\n\nEvalúa ubicación inusual,\ndistancia y cambios geográficos" as GeoRiskEngine
+
+    rectangle "Rule Engine\n\nReglas explicables y versionadas\npara cálculo de riesgo" as RuleEngine
+
+    rectangle "Pattern Detector\n\nDetecta patrones de fraude:\n- Velocity Fraud\n- Account Takeover\n- Beneficiary Abuse" as PatternDetector
+
+    rectangle "Risk Scoring Engine\n\nCalcula RiskScore y RiskLevel\nLOW / MEDIUM / HIGH / CRITICAL" as RiskScoringEngine
+
+    rectangle "RiskAssessment Aggregate\n\nGarantiza invariantes del dominio\ny genera eventos de riesgo" as RiskAggregate
+
+    rectangle "Kafka Event Producer\n\nPublica:\n- RiskScoreCalculated\n- FraudPatternDetected\n- CriticalRiskDetected" as KafkaProducer
+}
+
+Kafka --> KafkaConsumer : Eventos de dominio
+
+KafkaConsumer --> RiskOrchestrator : Evento recibido
+
+RiskOrchestrator --> ContextBuilder : Construye contexto
+
+ContextBuilder --> CustomerProfile : Consulta historial
+ContextBuilder --> DeviceTrust : Consulta confianza dispositivo
+ContextBuilder --> GeoService : Consulta ubicación
+ContextBuilder --> Redis : Lee estado caliente
+
+ContextBuilder --> VelocityEngine : Contexto transaccional
+ContextBuilder --> DeviceRiskEngine : Contexto de dispositivo
+ContextBuilder --> BehavioralRiskEngine : Contexto histórico
+ContextBuilder --> GeoRiskEngine : Contexto geográfico
+
+VelocityEngine --> Redis : Actualiza contadores\npor ventana
+VelocityEngine --> RuleEngine : Señales de velocidad
+DeviceRiskEngine --> RuleEngine : Señales de dispositivo
+BehavioralRiskEngine --> RuleEngine : Señales comportamentales
+GeoRiskEngine --> RuleEngine : Señales geográficas
+
+RuleEngine --> PatternDetector : Señales ponderadas
+PatternDetector --> RiskScoringEngine : Patrones detectados
+RiskScoringEngine --> RiskAggregate : RiskScore + RiskLevel
+
+RiskAggregate --> Postgres : Persiste decisión\ny reglas aplicadas
+RiskAggregate --> KafkaProducer : Eventos de riesgo
+
+KafkaProducer --> Kafka : Publica eventos
+
+KafkaConsumer --> Observability : Métricas / trazas / logs
+RiskOrchestrator --> Observability : Métricas / trazas / logs
+VelocityEngine --> Observability : Métricas / trazas / logs
+PatternDetector --> Observability : Métricas / trazas / logs
+RiskScoringEngine --> Observability : Métricas / trazas / logs
+@enduml

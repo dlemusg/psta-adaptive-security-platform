@@ -1,0 +1,302 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="DDD Domain Model">
+    <mxGraphModel dx="1800" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1"
+                  connect="1" arrows="1" fold="1" page="1"
+                  pageScale="1" pageWidth="2200" pageHeight="1600">
+
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITULO -->
+
+        <mxCell id="title"
+                value="PSTA - Domain Model"
+                style="text;html=1;fontSize=24;fontStyle=1;strokeColor=none;fillColor=none;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="850" y="20" width="400" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ========================= -->
+        <!-- DECISION TRANSACCIONAL -->
+        <!-- ========================= -->
+
+        <mxCell id="ctx1"
+                value="Bounded Context&#10;Decisión Transaccional"
+                style="swimlane;html=1;fillColor=#f8cecc;strokeColor=#b85450;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="20" y="100" width="500" height="330" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg1"
+                value="Aggregate Root&#10;TransactionDecision"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="140" y="40" width="220" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e11"
+                value="AuthenticationRequirement"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="40" y="140" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e12"
+                value="DecisionHistory"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="280" y="140" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo11"
+                value="TransactionId"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="30" y="240" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo12"
+                value="DecisionResult"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="180" y="240" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo13"
+                value="RiskLevel"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx1">
+          <mxGeometry x="330" y="240" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ========================= -->
+        <!-- RISK -->
+        <!-- ========================= -->
+
+        <mxCell id="ctx2"
+                value="Bounded Context&#10;Monitoreo de Riesgo y Fraude"
+                style="swimlane;html=1;fillColor=#f8cecc;strokeColor=#b85450;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="560" y="100" width="550" height="350" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg2"
+                value="Aggregate Root&#10;RiskAssessment"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="170" y="40" width="220" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e21"
+                value="RiskSignal"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="60" y="140" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e22"
+                value="FraudPattern"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="300" y="140" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo21"
+                value="RiskScore"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="40" y="250" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo22"
+                value="RiskLevel"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="180" y="250" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo23"
+                value="SignalType"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="320" y="250" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo24"
+                value="PatternType"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx2">
+          <mxGeometry x="460" y="250" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ========================= -->
+        <!-- AUTH -->
+        <!-- ========================= -->
+
+        <mxCell id="ctx3"
+                value="Bounded Context&#10;Autenticación Adaptativa"
+                style="swimlane;html=1;fillColor=#f8cecc;strokeColor=#b85450;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="1150" y="100" width="550" height="350" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg3"
+                value="Aggregate Root&#10;AuthenticationSession"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="150" y="40" width="250" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e31"
+                value="AuthenticationChallenge"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="50" y="140" width="200" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e32"
+                value="AuthenticationAttempt"
+                style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="300" y="140" width="200" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo31"
+                value="AuthenticationFactor"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="40" y="250" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo32"
+                value="AuthenticationResult"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="210" y="250" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="vo33"
+                value="SessionTrustLevel"
+                style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="ctx3">
+          <mxGeometry x="380" y="250" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- DEVICE -->
+
+        <mxCell id="ctx4"
+                value="Bounded Context&#10;Gestión de Dispositivos"
+                style="swimlane;html=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="20" y="520" width="400" height="300" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg4"
+                value="Device"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx4">
+          <mxGeometry x="120" y="40" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- CUSTOMER PROFILE -->
+
+        <mxCell id="ctx5"
+                value="Bounded Context&#10;Perfil de Cliente"
+                style="swimlane;html=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="460" y="520" width="450" height="300" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg5"
+                value="CustomerProfile"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx5">
+          <mxGeometry x="130" y="40" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ACCOUNT PROTECTION -->
+
+        <mxCell id="ctx6"
+                value="Bounded Context&#10;Protección de Cuenta"
+                style="swimlane;html=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="950" y="520" width="450" height="300" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg6"
+                value="AccountProtection"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx6">
+          <mxGeometry x="130" y="40" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- FACTORS -->
+
+        <mxCell id="ctx7"
+                value="Bounded Context&#10;Proveedores de Factores"
+                style="swimlane;html=1;fillColor=#d5e8d4;strokeColor=#82b366;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="1440" y="520" width="450" height="300" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg7"
+                value="AuthenticationFactorExecution"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx7">
+          <mxGeometry x="80" y="40" width="280" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- AUDIT -->
+
+        <mxCell id="ctx8"
+                value="Bounded Context&#10;Auditoría y Evidencia"
+                style="swimlane;html=1;fillColor=#fff2cc;strokeColor=#d6b656;"
+                vertex="1"
+                parent="1">
+          <mxGeometry x="700" y="900" width="500" height="260" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="agg8"
+                value="AuditTrail"
+                style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;"
+                vertex="1"
+                parent="ctx8">
+          <mxGeometry x="160" y="40" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

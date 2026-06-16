@@ -1,0 +1,68 @@
+@startuml
+
+title Network Topology
+
+skinparam shadowing false
+
+cloud Internet
+
+node "DMZ" {
+
+    node "WAF" as WAF
+
+    node "Load Balancer" as LB
+
+}
+
+node "Private Network" {
+
+    node "Kubernetes Cluster" {
+
+        node "API Gateway" as Gateway
+
+        node "Microservices" as Services
+
+    }
+
+    node "Kafka Cluster" as Kafka
+
+    database "Redis Cluster" as Redis
+
+    database "PostgreSQL Cluster" as Postgres
+
+    database "OpenSearch Cluster" as OpenSearch
+}
+
+cloud "Core Banking" as Core
+
+cloud "OTP Provider" as OTP
+
+cloud "Push Provider" as Push
+
+cloud "Device Intelligence" as Device
+
+Internet --> WAF
+
+WAF --> LB
+
+LB --> Gateway
+
+Gateway --> Services
+
+Services --> Kafka
+
+Services --> Redis
+
+Services --> Postgres
+
+Services --> OpenSearch
+
+Services --> Core
+
+Services --> OTP
+
+Services --> Push
+
+Services --> Device
+
+@enduml

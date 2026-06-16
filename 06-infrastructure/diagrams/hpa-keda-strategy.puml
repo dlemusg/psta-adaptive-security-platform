@@ -1,0 +1,99 @@
+@startuml
+title HPA + KEDA Scaling Strategy
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+queue "Kafka Topics" as Kafka
+
+cloud "Prometheus" as Prometheus
+
+component "KEDA" as KEDA
+component "HPA" as HPA
+
+component "ScaledObject" as ScaledObject
+
+node "Risk Assessment Deployment" as Deployment
+
+component "Pod-1" as Pod1
+component "Pod-2" as Pod2
+component "Pod-N" as PodN
+
+node "Cluster Autoscaler" as CA
+
+node "Worker Node A" as NodeA
+node "Worker Node B" as NodeB
+node "Worker Node N" as NodeN
+
+Kafka --> KEDA : Consumer Lag
+
+KEDA --> ScaledObject
+
+ScaledObject --> Deployment
+
+Prometheus --> HPA : CPU\nMemory\nTPS
+
+HPA --> Deployment
+
+Deployment --> Pod1
+Deployment --> Pod2
+Deployment --> PodN
+
+Pod1 --> NodeA
+Pod2 --> NodeB
+PodN --> NodeN
+
+Deployment --> CA : More Capacity Needed
+
+CA --> NodeN : Add Nodes
+
+note right of HPA
+
+Infrastructure Metrics
+
+CPU
+
+Memory
+
+TPS
+
+end note
+
+note right of KEDA
+
+Business Metrics
+
+Kafka Lag
+
+Pending Events
+
+Topic Throughput
+
+end note
+
+note bottom
+
+Scaling Flow
+
+Kafka Lag
+      ↓
+     KEDA
+      ↓
+ Deployment
+      ↓
+    Pods
+
+CPU / Memory
+      ↓
+      HPA
+      ↓
+ Deployment
+
+No Capacity
+      ↓
+Cluster Autoscaler
+      ↓
+New Nodes
+
+end note
+@enduml

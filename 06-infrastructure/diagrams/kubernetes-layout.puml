@@ -1,0 +1,142 @@
+@startuml
+title Kubernetes Topology - PSTA Platform
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Customer\nMobile/Web" as Customer
+
+cloud "Internet" as Internet
+
+node "API Gateway" as APIGW
+
+node "NGINX Ingress Controller" as Ingress
+
+frame "AWS Region" {
+
+    frame "Amazon EKS Cluster" {
+
+        package "Namespace: fraud-platform" {
+
+            node "Risk Assessment\nService\n(3 Pods)" as Risk
+
+            node "Adaptive Authentication\nService\n(2 Pods)" as Auth
+
+            node "Transaction Decision\nService\n(3 Pods)" as Decision
+
+            node "Account Protection\nService\n(2 Pods)" as Protection
+
+            node "Audit\nService\n(2 Pods)" as Audit
+        }
+
+        package "Namespace: monitoring" {
+
+            node "Prometheus" as Prometheus
+            node "Grafana" as Grafana
+            node "AlertManager" as AlertManager
+
+        }
+
+        package "Namespace: observability" {
+
+            node "OpenTelemetry\nCollector" as OTel
+
+        }
+
+        package "Namespace: security" {
+
+            node "cert-manager" as CertManager
+
+            node "Service Mesh\n(mTLS)" as Mesh
+
+        }
+    }
+
+    database "AWS RDS\nPostgreSQL" as RDS
+
+    database "AWS ElastiCache\nRedis" as Redis
+
+    queue "AWS MSK\nKafka Cluster" as Kafka
+
+    storage "AWS Secrets\nManager" as Secrets
+
+    storage "AWS ECR" as ECR
+
+}
+
+cloud "Azure DevOps" as Azure
+
+Customer --> Internet
+Internet --> APIGW
+APIGW --> Ingress
+
+Ingress --> Decision
+Ingress --> Auth
+
+Decision --> Risk
+Decision --> Auth
+Decision --> Protection
+
+Risk --> Kafka
+Auth --> Kafka
+Protection --> Kafka
+Audit --> Kafka
+
+Risk --> RDS
+Auth --> RDS
+Decision --> RDS
+Protection --> RDS
+
+Risk --> Redis
+Auth --> Redis
+Decision --> Redis
+
+Risk --> Secrets
+Auth --> Secrets
+Decision --> Secrets
+Protection --> Secrets
+
+Prometheus --> Risk
+Prometheus --> Auth
+Prometheus --> Decision
+Prometheus --> Protection
+Prometheus --> Audit
+
+OTel --> Risk
+OTel --> Auth
+OTel --> Decision
+OTel --> Protection
+OTel --> Audit
+
+Grafana --> Prometheus
+AlertManager --> Prometheus
+
+Mesh --> Risk
+Mesh --> Auth
+Mesh --> Decision
+Mesh --> Protection
+
+CertManager --> Mesh
+
+Azure --> ECR
+ECR --> Ingress
+
+note bottom of Kafka
+Topics
+
+transaction-events
+risk-events
+authentication-events
+account-events
+audit-events
+end note
+
+note right of Mesh
+Zero Trust
+
+mTLS
+Service Identity
+Certificate Rotation
+end note
+@enduml

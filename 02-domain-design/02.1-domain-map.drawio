@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Domain Map - PSTA">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="PSTA - Mapa de Dominios" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="500" y="30" width="500" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="channels" value="Canales Digitales&#xa;Web | Móvil | B2B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="70" y="210" width="210" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="decision" value="Core Domain&#xa;Decisión Transaccional&#xa;&#xa;Orquesta riesgo, autenticación y decisión final" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="390" y="200" width="260" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="risk" value="Core Domain&#xa;Monitoreo de Riesgo y Fraude&#xa;&#xa;Score, reglas, correlación y detección de fraude" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="760" y="120" width="300" height="130" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="auth" value="Core Domain&#xa;Autenticación Adaptativa&#xa;&#xa;Selección y validación dinámica de factores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="760" y="320" width="300" height="130" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="device" value="Supporting Domain&#xa;Gestión de Dispositivos&#xa;&#xa;Fingerprint, dispositivo conocido y confianza" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1150" y="90" width="280" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="profile" value="Supporting Domain&#xa;Perfil de Cliente&#xa;&#xa;Historial, comportamiento y contexto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1150" y="230" width="280" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="account" value="Supporting Domain&#xa;Protección de Cuenta&#xa;&#xa;Bloqueos, restricciones y revisión manual" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1150" y="370" width="280" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="factor" value="Supporting Domain&#xa;Proveedores de Factores&#xa;&#xa;Clave dinámica, push, biometría, SMS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1150" y="510" width="280" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="audit" value="Generic Domain&#xa;Auditoría y Evidencia&#xa;&#xa;Trazabilidad, cumplimiento y reconstrucción de decisiones" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="760" y="570" width="300" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="events" value="Plataforma de Eventos&#xa;Kafka Event Backbone&#xa;&#xa;Contratos versionados | eventos auditables | integración asíncrona" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="390" y="570" width="260" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="channels" target="decision" style="endArrow=block;html=1;rounded=0;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e2" edge="1" parent="1" source="decision" target="risk" style="endArrow=block;html=1;rounded=0;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e3" edge="1" parent="1" source="decision" target="auth" style="endArrow=block;html=1;rounded=0;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e4" edge="1" parent="1" source="risk" target="device" style="endArrow=block;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e5" edge="1" parent="1" source="risk" target="profile" style="endArrow=block;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e6" edge="1" parent="1" source="risk" target="account" style="endArrow=block;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e7" edge="1" parent="1" source="auth" target="factor" style="endArrow=block;html=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e8" edge="1" parent="1" source="decision" target="events" style="endArrow=block;html=1;rounded=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e9" edge="1" parent="1" source="risk" target="events" style="endArrow=block;html=1;rounded=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e10" edge="1" parent="1" source="auth" target="events" style="endArrow=block;html=1;rounded=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e11" edge="1" parent="1" source="events" target="audit" style="endArrow=block;html=1;rounded=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend" value="Leyenda&#xa;&#xa;Rojo: Core Domain&#xa;Verde: Supporting Domain&#xa;Amarillo: Generic Domain&#xa;Morado: Plataforma compartida&#xa;Línea sólida: consulta/decisión síncrona&#xa;Línea punteada: integración por eventos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="70" y="570" width="250" height="170" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,87 @@
+@startuml
+
+title C3 - Component Diagram\nAdaptive Authentication Service
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam rectangle {
+    RoundCorner 15
+}
+
+rectangle "Kafka Event Backbone" as Kafka
+database "Redis Cluster\n\nSession Trust\nActive Challenges\nCircuit Breaker State" as Redis
+database "PostgreSQL\n\nAuth Sessions\nChallenges\nAudit References" as Postgres
+rectangle "Proveedor OTP\nClave Dinámica" as OTP
+rectangle "Proveedor Push" as Push
+rectangle "Proveedor Biométrico" as Biometric
+rectangle "Observabilidad\nOpenTelemetry / Prometheus / Grafana" as Observability
+
+rectangle "Adaptive Authentication Service\nJava 21 + Spring WebFlux + Reactor" {
+
+    rectangle "Kafka Event Consumer\n\nConsume:\n- TransactionRequiresAuthentication\n- RiskScoreCalculated\n- CriticalRiskDetected" as KafkaConsumer
+
+    rectangle "Authentication Orchestrator\n\nCoordina el flujo de autenticación\nsegún riesgo, sesión y disponibilidad" as AuthOrchestrator
+
+    rectangle "Factor Selection Policy\n\nSelecciona factor:\n- Bajo: silencioso\n- Medio: Push\n- Alto: OTP/Biometría\n- Crítico: no degrada" as FactorPolicy
+
+    rectangle "Session Trust Manager\n\nGestiona nivel de confianza\nde la sesión activa" as SessionTrust
+
+    rectangle "Challenge Manager\n\nCrea, expira y valida\ndesafíos de autenticación" as ChallengeManager
+
+    rectangle "Fallback Engine\n\nDefine factor alternativo\nsegún riesgo y disponibilidad" as FallbackEngine
+
+    rectangle "Circuit Breaker Manager\n\nDetecta proveedores degradados\ny evita llamadas fallidas repetidas" as CircuitBreaker
+
+    rectangle "OTP Adapter\n\nAnti-Corruption Layer\npara Clave Dinámica" as OTPAdapter
+
+    rectangle "Push Adapter\n\nAnti-Corruption Layer\npara Push Authentication" as PushAdapter
+
+    rectangle "Biometric Adapter\n\nAnti-Corruption Layer\npara biometría" as BiometricAdapter
+
+    rectangle "AuthenticationSession Aggregate\n\nGarantiza invariantes:\n- Un desafío activo\n- Intentos máximos\n- Expiración\n- Resultado auditable" as AuthAggregate
+
+    rectangle "Kafka Event Producer\n\nPublica:\n- AuthenticationRequested\n- AuthenticationCompleted\n- AuthenticationFailed\n- SessionTrustUpdated" as KafkaProducer
+}
+
+Kafka --> KafkaConsumer : Eventos de dominio
+
+KafkaConsumer --> AuthOrchestrator : Evento recibido
+
+AuthOrchestrator --> FactorPolicy : Evalúa riesgo y contexto
+AuthOrchestrator --> SessionTrust : Consulta confianza de sesión
+AuthOrchestrator --> ChallengeManager : Crea challenge
+AuthOrchestrator --> CircuitBreaker : Consulta disponibilidad
+AuthOrchestrator --> FallbackEngine : Resuelve fallback si aplica
+
+SessionTrust --> Redis : Lee/escribe trust level
+ChallengeManager --> Redis : Challenge activo
+ChallengeManager --> Postgres : Persistencia de sesión
+
+FactorPolicy --> AuthAggregate : Factor requerido
+FallbackEngine --> AuthAggregate : Factor alternativo permitido
+
+AuthAggregate --> OTPAdapter : Ejecuta OTP si aplica
+AuthAggregate --> PushAdapter : Ejecuta Push si aplica
+AuthAggregate --> BiometricAdapter : Ejecuta biometría si aplica
+
+OTPAdapter --> OTP : Solicita / valida OTP
+PushAdapter --> Push : Solicita aprobación
+BiometricAdapter --> Biometric : Solicita validación
+
+OTPAdapter --> CircuitBreaker : Reporta éxito/fallo
+PushAdapter --> CircuitBreaker : Reporta éxito/fallo
+BiometricAdapter --> CircuitBreaker : Reporta éxito/fallo
+
+CircuitBreaker --> Redis : Estado de proveedores
+
+AuthAggregate --> KafkaProducer : Resultado autenticación
+KafkaProducer --> Kafka : Publica eventos
+
+KafkaConsumer --> Observability : Logs / métricas / trazas
+AuthOrchestrator --> Observability : Logs / métricas / trazas
+FallbackEngine --> Observability : Métricas fallback
+CircuitBreaker --> Observability : Estado proveedores
+AuthAggregate --> Observability : Resultado autenticación
+
+@enduml

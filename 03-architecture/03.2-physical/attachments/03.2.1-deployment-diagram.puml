@@ -1,0 +1,112 @@
+@startuml
+title Deployment Diagram\nPlataforma de Seguridad Transaccional Adaptativa (PSTA)
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+node "Internet" {
+
+    node "Canales Digitales\nWeb / Mobile / APIs" as Channels
+
+}
+
+node "Load Balancer" as LB
+
+node "Kubernetes Cluster" {
+
+    node "API Gateway Pod" as Gateway
+
+    node "Transaction Decision Pod" as TD
+
+    node "Risk Assessment Pod" as Risk
+
+    node "Adaptive Authentication Pod" as Auth
+
+    node "Account Protection Pod" as Protection
+
+    node "Device Trust Pod" as Device
+
+    node "Customer Profile Pod" as Profile
+
+    node "Audit Pod" as Audit
+}
+
+node "Kafka Cluster" as Kafka
+
+database "Redis Cluster" as Redis
+
+database "PostgreSQL Cluster" as Postgres
+
+database "OpenSearch Cluster" as OpenSearch
+
+cloud "Core Banking" as Core
+
+cloud "OTP Provider" as OTP
+
+cloud "Push Provider" as Push
+
+cloud "Device Intelligence" as DeviceExt
+
+cloud "Geolocation Service" as Geo
+
+node "Observability Platform" {
+
+    node "OpenTelemetry Collector" as OTel
+
+    node "Prometheus" as Prom
+
+    node "Grafana" as Grafana
+}
+
+Channels --> LB
+
+LB --> Gateway
+
+Gateway --> TD
+
+TD --> Risk
+TD --> Auth
+TD --> Protection
+
+Risk --> Device
+Risk --> Profile
+
+TD --> Kafka
+Risk --> Kafka
+Auth --> Kafka
+Protection --> Kafka
+Profile --> Kafka
+Device --> Kafka
+Audit --> Kafka
+
+Risk --> Redis
+Auth --> Redis
+Protection --> Redis
+
+TD --> Postgres
+Risk --> Postgres
+Auth --> Postgres
+Protection --> Postgres
+Profile --> Postgres
+
+Audit --> OpenSearch
+
+TD --> Core
+
+Auth --> OTP
+Auth --> Push
+
+Device --> DeviceExt
+
+Risk --> Geo
+
+Gateway --> OTel
+TD --> OTel
+Risk --> OTel
+Auth --> OTel
+Protection --> OTel
+Audit --> OTel
+
+OTel --> Prom
+Prom --> Grafana
+@enduml

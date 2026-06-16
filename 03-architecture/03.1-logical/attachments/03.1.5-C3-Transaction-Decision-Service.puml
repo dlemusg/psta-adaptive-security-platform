@@ -1,0 +1,78 @@
+@startuml
+
+title C3 - Component Diagram\nTransaction Decision Service
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam rectangle {
+    RoundCorner 15
+}
+
+rectangle "Kafka Event Backbone" as Kafka
+
+database "PostgreSQL\n\nDecision History\nDecision Policies" as Postgres
+
+rectangle "Risk Assessment Service" as RiskService
+rectangle "Adaptive Authentication Service" as AuthService
+rectangle "Account Protection Service" as ProtectionService
+
+rectangle "Observability\nOpenTelemetry / Prometheus / Grafana" as Observability
+
+rectangle "Transaction Decision Service\nJava 21 + Spring WebFlux + Reactor" {
+
+    rectangle "Transaction API\n\nRecibe solicitudes desde\nAPI Gateway" as TransactionAPI
+
+    rectangle "Transaction Validator\n\nValidaciones funcionales\ny de negocio" as Validator
+
+    rectangle "Decision Orchestrator\n\nCoordina el proceso de decisión" as Orchestrator
+
+    rectangle "Risk Evaluation Component\n\nEvalúa el resultado del riesgo" as RiskEvaluator
+
+    rectangle "Authentication Evaluation Component\n\nEvalúa autenticación requerida\no completada" as AuthEvaluator
+
+    rectangle "Protection Evaluation Component\n\nVerifica bloqueos y restricciones" as ProtectionEvaluator
+
+    rectangle "Decision Engine\n\nAplica reglas finales\nApprove / Reject / Step-Up" as DecisionEngine
+
+    rectangle "TransactionDecision Aggregate\n\nMantiene consistencia de la decisión" as Aggregate
+
+    rectangle "Kafka Event Producer\n\nPublica:\n- TransactionReceived\n- TransactionApproved\n- TransactionRejected\n- TransactionRequiresAuthentication" as KafkaProducer
+
+    rectangle "Kafka Event Consumer\n\nConsume:\n- RiskScoreCalculated\n- AuthenticationCompleted\n- AuthenticationFailed\n- AccountBlocked" as KafkaConsumer
+}
+
+TransactionAPI --> Validator
+
+Validator --> Orchestrator
+
+Orchestrator --> RiskEvaluator
+Orchestrator --> AuthEvaluator
+Orchestrator --> ProtectionEvaluator
+
+RiskEvaluator --> RiskService
+AuthEvaluator --> AuthService
+ProtectionEvaluator --> ProtectionService
+
+RiskEvaluator --> DecisionEngine
+AuthEvaluator --> DecisionEngine
+ProtectionEvaluator --> DecisionEngine
+
+DecisionEngine --> Aggregate
+
+Aggregate --> Postgres
+
+Aggregate --> KafkaProducer
+
+KafkaProducer --> Kafka
+
+Kafka --> KafkaConsumer
+
+KafkaConsumer --> Orchestrator
+
+TransactionAPI --> Observability
+Orchestrator --> Observability
+DecisionEngine --> Observability
+Aggregate --> Observability
+
+@enduml

@@ -1,0 +1,173 @@
+@startuml
+title Autoscaling Strategy - PSTA Platform
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+actor "Digital Channels\n(Mobile / Web / APIs)" as Channels
+
+rectangle "Transaction Load" as Load
+
+cloud "Prometheus Metrics" as Prometheus
+
+cloud "Kafka Topics" as Kafka
+
+component "Horizontal Pod Autoscaler\n(HPA)" as HPA
+
+component "KEDA\n(Event Driven Autoscaling)" as KEDA
+
+component "Cluster Autoscaler" as CA
+
+frame "AWS EKS Cluster" {
+
+    package "Risk Assessment Service" {
+
+        component "Pod-1" as Risk1
+        component "Pod-2" as Risk2
+        component "Pod-N" as RiskN
+    }
+
+    package "Transaction Decision Service" {
+
+        component "Pod-1" as Decision1
+        component "Pod-2" as Decision2
+        component "Pod-N" as DecisionN
+    }
+
+    package "Adaptive Authentication Service" {
+
+        component "Pod-1" as Auth1
+        component "Pod-2" as Auth2
+        component "Pod-N" as AuthN
+    }
+
+    package "Account Protection Service" {
+
+        component "Pod-1" as Protect1
+        component "Pod-2" as Protect2
+        component "Pod-N" as ProtectN
+    }
+
+    package "Audit Service" {
+
+        component "Pod-1" as Audit1
+        component "Pod-2" as Audit2
+        component "Pod-N" as AuditN
+    }
+}
+
+node "Worker Node A" as NodeA
+node "Worker Node B" as NodeB
+node "Worker Node N" as NodeN
+
+Channels --> Load
+
+Load --> Risk1
+Load --> Decision1
+Load --> Auth1
+
+Risk1 --> Kafka
+Decision1 --> Kafka
+Protect1 --> Kafka
+Audit1 --> Kafka
+
+Prometheus --> HPA : CPU\nMemory\nTPS
+
+Kafka --> KEDA : Consumer Lag\nPending Messages
+
+HPA --> RiskN : Scale Pods
+HPA --> DecisionN : Scale Pods
+HPA --> AuthN : Scale Pods
+
+KEDA --> RiskN : Scale Consumers
+KEDA --> ProtectN : Scale Consumers
+KEDA --> AuditN : Scale Consumers
+
+RiskN --> NodeA
+DecisionN --> NodeB
+AuthN --> NodeN
+ProtectN --> NodeA
+AuditN --> NodeB
+
+HPA --> CA : More Pods Needed
+KEDA --> CA : More Pods Needed
+
+CA --> NodeN : Add Worker Nodes
+
+note right of HPA
+
+Metrics Based Scaling
+
+CPU > 70%
+
+Memory > 75%
+
+TPS Threshold
+
+end note
+
+note right of KEDA
+
+Event Driven Scaling
+
+Kafka Lag
+
+Transaction Volume
+
+Authentication Events
+
+Fraud Events
+
+end note
+
+note right of CA
+
+Infrastructure Scaling
+
+Add Nodes
+
+Remove Nodes
+
+Based on Scheduling Capacity
+
+end note
+
+note bottom
+
+Scaling Strategy
+
+Level 1
+
+Pods Scale Out
+
+(HPA / KEDA)
+
+↓
+
+Level 2
+
+Nodes Scale Out
+
+(Cluster Autoscaler)
+
+↓
+
+Level 3
+
+Multi-AZ Distribution
+
+Benefits
+
+✓ Elastic Capacity
+
+✓ Cost Optimization
+
+✓ Event-Driven Scaling
+
+✓ High Availability
+
+✓ Kafka Consumer Scaling
+
+end note
+@enduml

@@ -1,0 +1,99 @@
+@startuml
+title C2 - Container Diagram\nPlataforma de Seguridad Transaccional Adaptativa (PSTA)
+
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam rectangle {
+    RoundCorner 15
+}
+
+actor Cliente
+actor "Analista de Fraude" as FraudAnalyst
+actor "Equipo de Operaciones" as Operations
+
+rectangle "Canales Digitales\nWeb / Mobile / B2B APIs" as Channels
+rectangle "Core Bancario" as CoreBanking
+rectangle "Proveedor OTP\nClave Dinámica" as OTP
+rectangle "Proveedor Push / Biometría" as Push
+rectangle "Device Intelligence Externo" as ExternalDevice
+rectangle "Servicio de Geolocalización" as Geo
+rectangle "SIEM / SOC" as SIEM
+rectangle "Observabilidad\nPrometheus / Grafana / OpenTelemetry" as Observability
+
+rectangle "PSTA" {
+
+  rectangle "API Gateway\n\nKong / Apigee / Spring Cloud Gateway\n\n- Rate limiting\n- Validación JWT\n- mTLS\n- Routing" as ApiGateway
+
+  rectangle "Transaction Decision Service\n\nJava 21 + Spring WebFlux\n\nOrquesta riesgo, autenticación\ny decisión final" as TransactionDecision
+
+  rectangle "Risk Assessment Service\n\nJava 21 + Spring WebFlux\n\nCalcula score, reglas,\nfraude por velocidad" as RiskAssessment
+
+  rectangle "Adaptive Authentication Service\n\nJava 21 + Spring WebFlux\n\nSelecciona factor,\nstep-up y fallback" as AuthService
+
+  rectangle "Account Protection Service\n\nJava 21 + Spring WebFlux\n\nBloqueos, restricciones\ny mitigación" as AccountProtection
+
+  rectangle "Device Trust Service\n\nJava 21 + Spring WebFlux\n\nFingerprint, confianza\ny reputación" as DeviceTrust
+
+  rectangle "Customer Profile Service\n\nJava 21 + Spring WebFlux\n\nHistorial, comportamiento\ny beneficiarios" as CustomerProfile
+
+  rectangle "Audit Service\n\nKafka Consumer\n\nEvidencia, trazabilidad\ny cumplimiento" as AuditService
+
+  rectangle "Kafka Event Backbone\n\nApache Kafka / Confluent\n\nEventos de dominio\nContratos versionados" as Kafka
+
+  database "Redis Cluster\n\n- Velocity counters\n- Session trust\n- Account locks\n- Feature cache" as Redis
+
+  database "PostgreSQL\nDatabase per Service\n\n- Decisions\n- Risk rules\n- Sessions\n- Profiles" as Postgres
+
+  database "OpenSearch / Object Storage\n\n- Auditoría\n- Evidencia\n- Búsqueda forense" as OpenSearch
+}
+
+Cliente --> Channels : Usa
+Channels --> ApiGateway : HTTPS / TLS
+
+ApiGateway --> TransactionDecision : REST/gRPC interno\nmTLS
+
+TransactionDecision --> RiskAssessment : Solicita evaluación\nsíncrona
+TransactionDecision --> AuthService : Solicita autenticación\nsegún riesgo
+TransactionDecision --> AccountProtection : Consulta estado\nbloqueos/restricciones
+
+RiskAssessment --> DeviceTrust : Consulta dispositivo
+RiskAssessment --> CustomerProfile : Consulta perfil
+RiskAssessment --> Redis : Lee/escribe contadores\nde velocidad
+RiskAssessment --> Geo : Consulta ubicación
+
+AuthService --> OTP : Solicita OTP
+AuthService --> Push : Solicita Push/Biometría
+AuthService --> Redis : Session trust / challenges
+
+DeviceTrust --> ExternalDevice : Consulta reputación
+DeviceTrust --> Postgres : Dispositivos confiables
+
+CustomerProfile --> Postgres : Perfil histórico
+AccountProtection --> Redis : Locks rápidos
+AccountProtection --> Postgres : Estado de protección
+
+TransactionDecision --> Kafka : Publica eventos\ntransaccionales
+RiskAssessment --> Kafka : Publica eventos\nde riesgo
+AuthService --> Kafka : Publica eventos\nde autenticación
+AccountProtection --> Kafka : Publica eventos\nde protección
+DeviceTrust --> Kafka : Publica eventos\nde dispositivo
+CustomerProfile --> Kafka : Publica eventos\nde perfil
+
+Kafka --> AuditService : Consume todos\nlos eventos críticos
+AuditService --> OpenSearch : Persiste evidencia
+
+TransactionDecision --> CoreBanking : Autoriza / rechaza\noperación
+
+FraudAnalyst --> ApiGateway : Consulta casos\nalertas
+Operations --> Observability : Monitorea dashboards
+
+ApiGateway --> Observability : Métricas / logs / trazas
+TransactionDecision --> Observability : Métricas / logs / trazas
+RiskAssessment --> Observability : Métricas / logs / trazas
+AuthService --> Observability : Métricas / logs / trazas
+AccountProtection --> Observability : Métricas / logs / trazas
+AuditService --> Observability : Métricas / logs / trazas
+
+Kafka --> SIEM : Eventos críticos\nde seguridad
+@enduml
